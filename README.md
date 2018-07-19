@@ -1,11 +1,17 @@
 # sentry-flake8
 
+[![PyPI](https://img.shields.io/pypi/v/sentry-flake8.svg)](https://pypi.org/project/sentry-flake8)
+[![Travis](https://img.shields.io/travis/getsentry/sentry-flake8.svg)](https://travis-ci.org/getsentry/sentry-flake8)
+
+
 Sentry's custom flake8 checker plugin.
 
 
 ## Install
 
-`pip install sentry-flake8` is all, no further configuration necessary for `flake8` to load the plugin:
+`pip install sentry-flake8`
+
+No further configuration is necessary for `flake8` to load the plugin. An example successful installation:
 
 ```
 $ flake8 --version
