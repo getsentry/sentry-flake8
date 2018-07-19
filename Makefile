@@ -1,6 +1,14 @@
+.PHONY: all lint test build clean
+
 all: build
 
-build: clean
+lint:
+	true
+
+test:
+	true
+
+build: clean test lint
 	python setup.py sdist bdist_wheel --universal > /dev/null
 
 clean:
