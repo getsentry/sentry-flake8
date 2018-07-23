@@ -1,7 +1,7 @@
 # sentry-flake8
 
 [![PyPI](https://img.shields.io/pypi/v/sentry-flake8.svg)](https://pypi.org/project/sentry-flake8)
-[![Travis](https://img.shields.io/travis/getsentry/sentry-flake8.svg)](https://travis-ci.org/getsentry/sentry-flake8)
+[![Travis](https://img.shields.io/travis/com/getsentry/sentry-flake8.svg)](https://travis-ci.com/getsentry/sentry-flake8)
 
 
 Sentry's custom flake8 checker plugin.
