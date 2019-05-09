@@ -3,10 +3,10 @@
 all: build
 
 lint:
-	true
+	flake8
 
 test:
-	true
+	py.test
 
 build: clean test lint
 	python setup.py sdist bdist_wheel --universal > /dev/null

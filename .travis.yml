@@ -9,7 +9,7 @@ branches:
     - /^\d[\d.]+$/
 
 install:
-  - pip install -e .
+  - pip install -e .[test]
 
 script:
   - make build
