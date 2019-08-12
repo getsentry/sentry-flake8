@@ -3,13 +3,20 @@ on: [push]
 
 jobs:
   test:
-    name: test suite on ${{ matrix.os }}
+    name: test suite {{ matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        python: [ '2.7' ]
         os: [ubuntu-16.04]
     steps:
+    # TODO: how to get the sha of the latest pushed commit?
+    - uses: actions/checkout@master
+    - uses: actions/setup-python@v1
+      with:
+        version: ${{ matrix.python }}
+        architecture: x64
     - name: test and build
       run: |
-        python2.7 -m pip install -e ".[test]"
+        python -m pip install -e ".[test]"
         make build
