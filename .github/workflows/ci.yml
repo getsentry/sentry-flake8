@@ -11,7 +11,7 @@ jobs:
         os: [ubuntu-16.04]
     steps:
     # TODO: how to get the sha of the latest pushed commit?
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@master
     - uses: actions/setup-python@v1
       with:
         version: ${{ matrix.python }}
