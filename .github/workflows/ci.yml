@@ -2,7 +2,7 @@ name: GitHub CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     name: test suite {{ matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
