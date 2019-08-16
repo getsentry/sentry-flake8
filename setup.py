@@ -9,7 +9,11 @@ setup(
     author="Sentry",
     author_email="hello@sentry.io",
     install_requires=["flake8>=3.5.0,<3.6.0"],
-    test_requires=["pytest"],
+    extras_require={
+        "test": [
+            "pytest",
+        ],
+    },
     py_modules=["sentry_check"],
     entry_points={"flake8.extension": ["B = sentry_check:SentryCheck"]},
 )
