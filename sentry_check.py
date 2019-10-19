@@ -114,7 +114,7 @@ class SentryVisitor(ast.NodeVisitor):
         elif len(call_path) == 2 and call_path[1] == "message":
             name = call_path[0]
             for elem in reversed(self.node_stack[:-1]):
-                if isinstance(elem, ast.ExceptHandler) and elem.name.id == name:
+                if isinstance(elem, ast.ExceptHandler) and getattr(elem.name, "id", elem.name) == name:
                     self.errors.append(B306(node.lineno, node.col_offset))
                     break
 

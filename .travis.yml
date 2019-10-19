@@ -16,10 +16,6 @@ install:
 script:
   - make build
 
-matrix:
-  allow_failures:
-    - python: 3.8
-
 deploy:
   provider: pypi
   user: getsentry
