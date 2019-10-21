@@ -11,7 +11,7 @@ branches:
     - /^\d[\d.]+$/
 
 install:
-  - pip install -e .[test]
+  - pip install -e .[tests]
 
 script:
   - make build
