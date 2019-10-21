@@ -7,15 +7,16 @@ branches:
     - master
     - /^\d[\d.]+$/
 
-install:
-  - pip install -e .[test]
-
-script:
-  - make build
-
 matrix:
   include:
     - python: 2.7
+    - python: 3.7
+
+install:
+  - pip install -e .[tests]
+
+script:
+  - make build
 
 deploy:
   provider: pypi
