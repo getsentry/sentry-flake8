@@ -39,7 +39,7 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_UAdd(self, node):
-        trailing_nodes = list(map(type, self.node_window[-4:]))
+        trailing_nodes = list(map(type, self.node_window[-4:]))  # NOQA: B315
         if trailing_nodes == [ast.UnaryOp, ast.UAdd, ast.UnaryOp, ast.UAdd]:
             originator = self.node_window[-4]
             self.errors.append(B002(originator.lineno, originator.col_offset))
@@ -215,7 +215,7 @@ class SentryVisitor(ast.NodeVisitor):
     def check_for_b007(self, node):
         targets = NameFinder()
         targets.visit(node.target)
-        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))
+        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))  # NOQA: B315
         body = NameFinder()
         for expr in node.body:
             body.visit(expr)
