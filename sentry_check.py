@@ -55,7 +55,7 @@ class SentryVisitor(ast.NodeVisitor):
                     self.has_absolute_import = True
                     break
 
-        if node.module == "six.moves":
+        if node.module == "sentry.utils.compat":
             for nameproxy in node.names:
                 if nameproxy.name in B315.names:
                     self.satisfies_B315_imports = True
@@ -487,8 +487,7 @@ B313 = Error(
 
 B314 = Error(message=u"B314: print functions or statements are not allowed.")
 
-# TODO: enforce wrapping in a list? Or, I could do that in compat, and replace all current six.moves with that.
 B315 = Error(
-    message=u"B315: {} is an iterable in Python 3. Use ``from six.moves import {}`` instead."
+    message=u"B315: {} is an iterable in Python 3. Use ``from sentry.utils.compat import {}`` instead."
 )
 B315.names = {"map", "filter", "zip"}
