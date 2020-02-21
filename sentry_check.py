@@ -18,6 +18,7 @@ class SentryVisitor(ast.NodeVisitor):
         self.lines = lines
 
         self.has_absolute_import = False
+        self.satisfies_B315_imports = False
         self.node_stack = []
         self.node_window = []
 
@@ -52,6 +53,12 @@ class SentryVisitor(ast.NodeVisitor):
             for nameproxy in node.names:
                 if nameproxy.name == "absolute_import":
                     self.has_absolute_import = True
+                    break
+
+        if node.module == "six.moves":
+            for nameproxy in node.names:
+                if nameproxy.name in B315.names:
+                    self.satisfies_B315_imports = True
                     break
 
     def visit_Import(self, node):
@@ -161,6 +168,9 @@ class SentryVisitor(ast.NodeVisitor):
         for bug in (B308, B309, B310, B311):
             if node.id in bug.names:
                 self.errors.append(bug(lineno=node.lineno, col=node.col_offset))
+        if node.id in B315.names:
+            if not self.satisfies_B315_imports:
+                self.errors.append(B315(lineno=node.lineno, col=node.col_offset, vars=(node.id, node.id)))
         if node.id == "print":
             self.check_print(node)
 
@@ -476,3 +486,9 @@ B313 = Error(
 )
 
 B314 = Error(message=u"B314: print functions or statements are not allowed.")
+
+# TODO: enforce wrapping in a list? Or, I could do that in compat, and replace all current six.moves with that.
+B315 = Error(
+    message=u"B315: {} is an iterable in Python 3. Use ``from six.moves import {}`` instead."
+)
+B315.names = {"map", "filter", "zip"}
