@@ -6,7 +6,7 @@ from functools import partial
 
 import pycodestyle
 
-__version__ = "0.0.1"
+__version__ = "0.2.0"
 
 
 class SentryVisitor(ast.NodeVisitor):
@@ -18,6 +18,7 @@ class SentryVisitor(ast.NodeVisitor):
         self.lines = lines
 
         self.has_absolute_import = False
+        self.satisfies_B315_imports = False
         self.node_stack = []
         self.node_window = []
 
@@ -38,7 +39,7 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_UAdd(self, node):
-        trailing_nodes = list(map(type, self.node_window[-4:]))
+        trailing_nodes = list(map(type, self.node_window[-4:]))  # NOQA: B315
         if trailing_nodes == [ast.UnaryOp, ast.UAdd, ast.UnaryOp, ast.UAdd]:
             originator = self.node_window[-4]
             self.errors.append(B002(originator.lineno, originator.col_offset))
@@ -52,6 +53,12 @@ class SentryVisitor(ast.NodeVisitor):
             for nameproxy in node.names:
                 if nameproxy.name == "absolute_import":
                     self.has_absolute_import = True
+                    break
+
+        if node.module == "sentry.utils.compat":
+            for nameproxy in node.names:
+                if nameproxy.name in B315.names:
+                    self.satisfies_B315_imports = True
                     break
 
     def visit_Import(self, node):
@@ -161,6 +168,9 @@ class SentryVisitor(ast.NodeVisitor):
         for bug in (B308, B309, B310, B311):
             if node.id in bug.names:
                 self.errors.append(bug(lineno=node.lineno, col=node.col_offset))
+        if node.id in B315.names:
+            if not self.satisfies_B315_imports:
+                self.errors.append(B315(lineno=node.lineno, col=node.col_offset, vars=(node.id, node.id)))
         if node.id == "print":
             self.check_print(node)
 
@@ -205,7 +215,7 @@ class SentryVisitor(ast.NodeVisitor):
     def check_for_b007(self, node):
         targets = NameFinder()
         targets.visit(node.target)
-        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))
+        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))  # NOQA: B315
         body = NameFinder()
         for expr in node.body:
             body.visit(expr)
@@ -476,3 +486,8 @@ B313 = Error(
 )
 
 B314 = Error(message=u"B314: print functions or statements are not allowed.")
+
+B315 = Error(
+    message=u"B315: {} is an iterable in Python 3. Use ``from sentry.utils.compat import {}`` instead."
+)
+B315.names = {"map", "filter", "zip"}

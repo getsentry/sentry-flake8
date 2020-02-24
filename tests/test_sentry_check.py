@@ -151,6 +151,30 @@ class SentryCheckTestCase(unittest.TestCase):
         errors = list(bbc.run())
         self.assertEqual(errors, self.errors(B314(3, 0)))
 
+    def test_b315(self):
+        bbc = SentryCheck(filename=path("b315.py"))
+        errors = list(bbc.run())
+        assert errors == [
+            (
+                3,
+                0,
+                "B315: map is an iterable in Python 3. Use ``from sentry.utils.compat import map`` instead.",
+                SentryCheck,
+            ),
+            (
+                4,
+                0,
+                "B315: filter is an iterable in Python 3. Use ``from sentry.utils.compat import filter`` instead.",
+                SentryCheck,
+            ),
+            (
+                4,
+                21,
+                "B315: zip is an iterable in Python 3. Use ``from sentry.utils.compat import zip`` instead.",
+                SentryCheck,
+            ),
+        ]
+
     def test_selfclean_sentry_check(self):
         stdout = subprocess.check_output(["flake8", path(os.pardir, "sentry_check.py")])
         self.assertEqual(stdout, b"")
