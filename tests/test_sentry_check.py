@@ -175,6 +175,18 @@ class SentryCheckTestCase(unittest.TestCase):
             ),
         ]
 
+    def test_b316(self):
+        bbc = SentryCheck(filename=path("b316.py"))
+        errors = list(bbc.run())
+        assert errors == [
+            (
+                10,
+                0,
+                "B316: itertools.izip is not available in Python 3. Use ``from sentry.utils.compat import zip as izip`` instead.",
+                SentryCheck,
+            ),
+        ]
+
     def test_selfclean_sentry_check(self):
         stdout = subprocess.check_output(["flake8", path(os.pardir, "sentry_check.py")])
         self.assertEqual(stdout, b"")

@@ -19,6 +19,7 @@ class SentryVisitor(ast.NodeVisitor):
 
         self.has_absolute_import = False
         self.satisfies_B315_imports = False
+        self.itertools_izip = False
         self.node_stack = []
         self.node_window = []
 
@@ -59,6 +60,12 @@ class SentryVisitor(ast.NodeVisitor):
             for nameproxy in node.names:
                 if nameproxy.name in B315.names:
                     self.satisfies_B315_imports = True
+                    break
+
+        if node.module == "itertools":
+            for nameproxy in node.names:
+                if nameproxy.name in B316.names:
+                    self.itertools_izip = True
                     break
 
     def visit_Import(self, node):
@@ -171,6 +178,12 @@ class SentryVisitor(ast.NodeVisitor):
         if node.id in B315.names:
             if not self.satisfies_B315_imports:
                 self.errors.append(B315(lineno=node.lineno, col=node.col_offset, vars=(node.id, node.id)))
+        if node.id in B316.names:
+            # XXX: wasn't able to figure out how else to detect whether or not izip was imported from itertools
+            # this will do for now, but we may be blacklisting more imports in the future
+            # visit_Call didn't seem to work
+            if self.itertools_izip:
+                self.errors.append(B316(lineno=node.lineno, col=node.col_offset))
         if node.id == "print":
             self.check_print(node)
 
@@ -491,3 +504,8 @@ B315 = Error(
     message=u"B315: {} is an iterable in Python 3. Use ``from sentry.utils.compat import {}`` instead."
 )
 B315.names = {"map", "filter", "zip"}
+
+B316 = Error(
+    message=u"B316: itertools.izip is not available in Python 3. Use ``from sentry.utils.compat import zip as izip`` instead."
+)
+B316.names = {"izip"}
