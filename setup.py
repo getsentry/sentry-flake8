@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="sentry-flake8",
-    version="0.3.0",
+    version="0.3.1",
     description="Sentry's custom flake8 checker plugin.",
     license="Apache 2.0",
     url="https://github.com/getsentry/sentry-flake8",
