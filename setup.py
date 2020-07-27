@@ -9,6 +9,7 @@ setup(
     author="Sentry",
     author_email="hello@sentry.io",
     install_requires=["flake8>=3.7.0,<3.8.0"],
+    package_dir={"": "src"},
     extras_require={
         "tests": [
             "pytest==4.6.5",  # last 2.7 and 3.7 compat version
