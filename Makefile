@@ -3,7 +3,7 @@
 all: build
 
 lint:
-	flake8
+	flake8 src/
 
 test:
 	py.test
