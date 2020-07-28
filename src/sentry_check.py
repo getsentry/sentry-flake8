@@ -128,7 +128,10 @@ class SentryVisitor(ast.NodeVisitor):
         elif len(call_path) == 2 and call_path[1] == "message":
             name = call_path[0]
             for elem in reversed(self.node_stack[:-1]):
-                if isinstance(elem, ast.ExceptHandler) and getattr(elem.name, "id", elem.name) == name:
+                if (
+                    isinstance(elem, ast.ExceptHandler)
+                    and getattr(elem.name, "id", elem.name) == name
+                ):
                     self.errors.append(B306(node.lineno, node.col_offset))
                     break
 
@@ -177,7 +180,11 @@ class SentryVisitor(ast.NodeVisitor):
                 self.errors.append(bug(lineno=node.lineno, col=node.col_offset))
         if node.id in B315.names:
             if not self.satisfies_B315_imports:
-                self.errors.append(B315(lineno=node.lineno, col=node.col_offset, vars=(node.id, node.id)))
+                self.errors.append(
+                    B315(
+                        lineno=node.lineno, col=node.col_offset, vars=(node.id, node.id)
+                    )
+                )
         if node.id in B316.names:
             # XXX: wasn't able to figure out how else to detect whether or not izip was imported from itertools
             # this will do for now, but we may be blacklisting more imports in the future
@@ -228,7 +235,9 @@ class SentryVisitor(ast.NodeVisitor):
     def check_for_b007(self, node):
         targets = NameFinder()
         targets.visit(node.target)
-        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))  # NOQA: B315
+        ctrl_names = set(
+            filter(lambda s: not s.startswith("_"), targets.names)  # NOQA: B315
+        )
         body = NameFinder()
         for expr in node.body:
             body.visit(expr)
@@ -501,11 +510,13 @@ B313 = Error(
 B314 = Error(message=u"B314: print functions or statements are not allowed.")
 
 B315 = Error(
-    message=u"B315: {} is an iterable in Python 3. Use ``from sentry.utils.compat import {}`` instead."
+    message=u"B315: {} is an iterable in Python 3. Use ``from "
+    "sentry.utils.compat import {}`` instead."
 )
 B315.names = {"map", "filter", "zip"}
 
 B316 = Error(
-    message=u"B316: itertools.izip is not available in Python 3. Use ``from sentry.utils.compat import zip as izip`` instead."
+    message=u"B316: itertools.izip is not available in Python 3. Use ``from "
+    "sentry.utils.compat import zip as izip`` instead."
 )
 B316.names = {"izip"}
