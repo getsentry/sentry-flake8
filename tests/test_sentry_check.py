@@ -29,7 +29,7 @@ from sentry_check import (
 
 
 def path(*paths):
-    return os.path.join(os.path.dirname(__file__), *paths)
+    return os.path.join(os.path.dirname(__file__), "cases", *paths)
 
 
 class SentryCheckTestCase(unittest.TestCase):
@@ -188,12 +188,14 @@ class SentryCheckTestCase(unittest.TestCase):
         ]
 
     def test_selfclean_sentry_check(self):
-        stdout = subprocess.check_output(["flake8", path(os.pardir, "sentry_check.py")])
+        stdout = subprocess.check_output(
+            ["flake8", os.path.join(os.path.dirname(__file__), os.pardir, "src")]
+        )
         self.assertEqual(stdout, b"")
         # self.assertEqual(proc.stderr, b"")
 
     def test_selfclean_test_sentry_check(self):
-        stdout = subprocess.check_output(["flake8", path()])
+        stdout = subprocess.check_output(["flake8", path("test_sentry_check.py")])
         self.assertEqual(stdout, b"")
         # self.assertEqual(proc.stderr, b'')
 
