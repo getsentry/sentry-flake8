@@ -187,6 +187,36 @@ class SentryCheckTestCase(unittest.TestCase):
             ),
         ]
 
+    def test_b317(self):
+        bbc = SentryCheck(filename=path("b317.py"))
+        errors = list(bbc.run())
+        assert errors == [
+            (
+                3,
+                0,
+                "B317: Use ``from sentry.utils import json`` instead.",
+                SentryCheck,
+            ),
+            (
+                4,
+                0,
+                "B317: Use ``from sentry.utils import json`` instead.",
+                SentryCheck,
+            ),
+            (
+                5,
+                0,
+                "B317: Use ``from sentry.utils import json`` instead.",
+                SentryCheck,
+            ),
+            (
+                6,
+                0,
+                "B317: Use ``from sentry.utils import json`` instead.",
+                SentryCheck,
+            ),
+        ]
+
     def test_selfclean_sentry_check(self):
         stdout = subprocess.check_output(
             ["flake8", os.path.join(os.path.dirname(__file__), os.pardir, "src")]

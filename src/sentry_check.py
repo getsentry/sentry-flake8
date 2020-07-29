@@ -68,10 +68,20 @@ class SentryVisitor(ast.NodeVisitor):
                     self.itertools_izip = True
                     break
 
+        if node.module in B317.modules:
+            for nameproxy in node.names:
+                if nameproxy.name in B317.names:
+                    self.errors.append(B317(node.lineno, node.col_offset))
+                    break
+
     def visit_Import(self, node):
         for alias in node.names:
             if alias.name.split(".", 1)[0] in B307.names:
                 self.errors.append(B307(node.lineno, node.col_offset))
+
+        for alias in node.names:
+            if alias.name.split(".", 1)[0] in B317.modules:
+                self.errors.append(B317(node.lineno, node.col_offset))
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Attribute):
@@ -520,3 +530,15 @@ B316 = Error(
     "sentry.utils.compat import zip as izip`` instead."
 )
 B316.names = {"izip"}
+
+B317 = Error(message=u"B317: Use ``from sentry.utils import json`` instead.")
+B317.modules = {"json", "simplejson"}
+B317.names = {
+    "load",
+    "loads",
+    "dump",
+    "dumps",
+    "JSONEncoder",
+    "JSONDecodeError",
+    "_default_encoder",
+}
