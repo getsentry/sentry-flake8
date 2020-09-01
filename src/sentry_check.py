@@ -482,7 +482,8 @@ B307.names = {"urllib", "urlib2", "urlparse"}
 
 B308 = Error(
     message=u"B308: The usage of ``str`` differs between Python 2 and 3. Use "
-    "``six.binary_type`` instead."
+    "``six.text_type`` instead. If you actually need to represent bytes, "
+    "use ``six.binary_type``."
 )
 B308.names = {"str"}
 
