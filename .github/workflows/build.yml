@@ -1,0 +1,29 @@
+name: build
+on: push
+
+jobs:
+  my_python_job:
+    name: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python:
+          - 2.7.16
+          - 3.6.10
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install python
+      uses: gabrielfalcao/pyenv-action@v5
+      with:
+        default: "${{ matrix.python }}"
+        command: pip install -U pip  # upgrade pip after installing python
+
+    - name: Install dependencies
+      run: pip install -e .[tests]
+
+    - name: Run linting
+      run: make lint
+
+    - name: Run tests
+      run: make test
