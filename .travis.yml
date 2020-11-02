@@ -10,7 +10,7 @@ branches:
 matrix:
   include:
     - python: 2.7
-    - python: 3.7
+    - python: 3.9
 
 install:
   - pip install -e .[tests]
