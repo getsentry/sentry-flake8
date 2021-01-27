@@ -17,15 +17,13 @@ class SentryVisitor(ast.NodeVisitor):
         self.filename = filename
         self.lines = lines
 
-        self.has_absolute_import = False
-        self.satisfies_B315_imports = False
+        # self.has_absolute_import = False
         self.itertools_izip = False
         self.node_stack = []
         self.node_window = []
 
     def finish(self):
-        if not self.has_absolute_import:
-            self.errors.append(B102(1, 1))
+        pass
 
     def visit(self, node):
         self.node_stack.append(node)
@@ -40,33 +38,18 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_UAdd(self, node):
-        trailing_nodes = list(map(type, self.node_window[-4:]))  # NOQA: B315
+        trailing_nodes = list(map(type, self.node_window[-4:]))
         if trailing_nodes == [ast.UnaryOp, ast.UAdd, ast.UnaryOp, ast.UAdd]:
             originator = self.node_window[-4]
             self.errors.append(B002(originator.lineno, originator.col_offset))
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
-        if node.module in B307.names:
-            self.errors.append(B307(node.lineno, node.col_offset))
-
-        if node.module == "__future__":
-            for nameproxy in node.names:
-                if nameproxy.name == "absolute_import":
-                    self.has_absolute_import = True
-                    break
-
-        if node.module == "sentry.utils.compat":
-            for nameproxy in node.names:
-                if nameproxy.name in B315.names:
-                    self.satisfies_B315_imports = True
-                    break
-
-        if node.module == "itertools":
-            for nameproxy in node.names:
-                if nameproxy.name in B316.names:
-                    self.itertools_izip = True
-                    break
+        # if node.module == "__future__":
+        #     for nameproxy in node.names:
+        #         if nameproxy.name == "absolute_import":
+        #             self.has_absolute_import = True
+        #             break
 
         if node.module in B317.modules:
             for nameproxy in node.names:
@@ -76,23 +59,12 @@ class SentryVisitor(ast.NodeVisitor):
 
     def visit_Import(self, node):
         for alias in node.names:
-            if alias.name.split(".", 1)[0] in B307.names:
-                self.errors.append(B307(node.lineno, node.col_offset))
-
-        for alias in node.names:
             if alias.name.split(".", 1)[0] in B317.modules:
                 self.errors.append(B317(node.lineno, node.col_offset))
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Attribute):
-            for bug in (B301, B302, B305):
-                if node.func.attr in bug.methods:
-                    call_path = ".".join(self.compose_call_path(node.func.value))
-                    if call_path not in bug.valid_paths:
-                        self.errors.append(bug(node.lineno, node.col_offset))
-                    break
-            else:
-                self.check_for_b005(node)
+            self.check_for_b005(node)
             for bug in (B312,):
                 if node.func.attr in bug.methods:
                     call_path = ".".join(self.compose_call_path(node.func.value))
@@ -132,37 +104,16 @@ class SentryVisitor(ast.NodeVisitor):
             pass
 
     def visit_Attribute(self, node):
-        call_path = list(self.compose_call_path(node))
-        if ".".join(call_path) == "sys.maxint":
-            self.errors.append(B304(node.lineno, node.col_offset))
-        elif len(call_path) == 2 and call_path[1] == "message":
-            name = call_path[0]
-            for elem in reversed(self.node_stack[:-1]):
-                if (
-                    isinstance(elem, ast.ExceptHandler)
-                    and getattr(elem.name, "id", elem.name) == name
-                ):
-                    self.errors.append(B306(node.lineno, node.col_offset))
-                    break
-
         if node.attr in B101.methods:
             self.errors.append(B101(node.lineno, node.col_offset, vars=(node.attr,)))
 
     def visit_Assign(self, node):
-        # TODO(dcramer): pretty sure these aren't working correctly on Python2
-        if isinstance(self.node_stack[-2], ast.ClassDef):
-            # note: by hasattr belowe we're ignoring starred arguments, slices
-            # and tuples for simplicity.
-            assign_targets = {t.id for t in node.targets if hasattr(t, "id")}
-            if "__metaclass__" in assign_targets:
-                self.errors.append(B303(node.lineno, node.col_offset))
-            if "__unicode__" in assign_targets:
-                self.errors.append(B313(node.lineno, node.col_offset))
-        elif len(node.targets) == 1:
+        if len(node.targets) == 1:
             t = node.targets[0]
             if isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name):
                 if (t.value.id, t.attr) == ("os", "environ"):
                     self.errors.append(B003(node.lineno, node.col_offset))
+
         self.generic_visit(node)
 
     def visit_For(self, node):
@@ -185,22 +136,6 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Name(self, node):
-        for bug in (B308, B309, B310, B311):
-            if node.id in bug.names:
-                self.errors.append(bug(lineno=node.lineno, col=node.col_offset))
-        if node.id in B315.names:
-            if not self.satisfies_B315_imports:
-                self.errors.append(
-                    B315(
-                        lineno=node.lineno, col=node.col_offset, vars=(node.id, node.id)
-                    )
-                )
-        if node.id in B316.names:
-            # XXX: wasn't able to figure out how else to detect whether or not izip was imported from itertools
-            # this will do for now, but we may be blacklisting more imports in the future
-            # visit_Call didn't seem to work
-            if self.itertools_izip:
-                self.errors.append(B316(lineno=node.lineno, col=node.col_offset))
         if node.id == "print":
             self.check_print(node)
 
@@ -246,7 +181,7 @@ class SentryVisitor(ast.NodeVisitor):
         targets = NameFinder()
         targets.visit(node.target)
         ctrl_names = set(
-            filter(lambda s: not s.startswith("_"), targets.names)  # NOQA: B315
+            filter(lambda s: not s.startswith("_"), targets.names)
         )
         body = NameFinder()
         for expr in node.body:
@@ -434,77 +369,6 @@ B101.methods = {
     "called_once_with",
 }
 
-B102 = Error(message=u"B102: Missing `from __future__ import absolute_import`")
-
-# Those could be false positives but it's more dangerous to let them slip
-# through if they're not.
-B301 = Error(
-    message=u"B301: Python 3 does not include .iter* methods on dictionaries. "
-    "Use `six.iter*` or `future.utils.iter*` instead."
-)
-B301.methods = {"iterkeys", "itervalues", "iteritems", "iterlists"}
-B301.valid_paths = {"six", "future.utils", "builtins"}
-
-B302 = Error(
-    message=u"B302: Python 3 does not include .view* methods on dictionaries. "
-    "Remove the ``view`` prefix from the method name. Use `six.view*` "
-    "or `future.utils.view*` instead."
-)
-B302.methods = {"viewkeys", "viewvalues", "viewitems", "viewlists"}
-B302.valid_paths = {"six", "future.utils", "builtins"}
-
-B303 = Error(
-    message=u"B303: __metaclass__ does not exist in Python 3. Use "
-    "use `@six.add_metaclass()` instead."
-)
-
-B304 = Error(message=u"B304: sys.maxint does not exist in Python 3. Use `sys.maxsize`.")
-
-B305 = Error(
-    message=u"B305: .next() does not exist in Python 3. Use ``six.next()`` " "instead."
-)
-B305.methods = {"next"}
-B305.valid_paths = {"six", "future.utils", "builtins"}
-
-B306 = Error(
-    message=u"B306: ``BaseException.message`` has been deprecated as of Python "
-    "2.6 and is removed in Python 3. Use ``str(e)`` to access the "
-    "user-readable message. Use ``e.args`` to access arguments passed "
-    "to the exception."
-)
-
-B307 = Error(
-    message=u"B307: Python 3 has combined urllib, urllib2, and urlparse into "
-    "a single library. For Python 2 compatibility, utilize the "
-    "six.moves.urllib module."
-)
-B307.names = {"urllib", "urlib2", "urlparse"}
-
-B308 = Error(
-    message=u"B308: The usage of ``str`` differs between Python 2 and 3. Use "
-    "``six.text_type`` instead. If you actually need to represent bytes, "
-    "use ``six.binary_type``."
-)
-B308.names = {"str"}
-
-B309 = Error(
-    message=u"B309: ``unicode`` does not exist in Python 3. Use "
-    "``six.text_type`` instead."
-)
-B309.names = {"unicode"}
-
-B310 = Error(
-    message=u"B310: ``basestring`` does not exist in Python 3. Use "
-    "``six.string_types`` instead."
-)
-B310.names = {"basestring"}
-
-B311 = Error(
-    message=u"B311: ``long`` should not be used. Use int instead, and allow "
-    "Python to deal with handling large integers."
-)
-B311.names = {"long"}
-
 B312 = Error(
     message=u"B312: ``cgi.escape`` and ``html.escape`` should not be used. Use "
     "sentry.utils.html.escape instead."
@@ -512,25 +376,7 @@ B312 = Error(
 B312.methods = {"escape"}
 B312.invalid_paths = {"cgi", "html"}
 
-B313 = Error(
-    message=u"B313: ``__unicode__`` should not be defined on classes. Define "
-    "just ``__str__`` returning a unicode text string, and use the "
-    "sentry.utils.compat.implements_to_string class decorator."
-)
-
 B314 = Error(message=u"B314: print functions or statements are not allowed.")
-
-B315 = Error(
-    message=u"B315: {} is an iterable in Python 3. Use ``from "
-    "sentry.utils.compat import {}`` instead."
-)
-B315.names = {"map", "filter", "zip"}
-
-B316 = Error(
-    message=u"B316: itertools.izip is not available in Python 3. Use ``from "
-    "sentry.utils.compat import zip as izip`` instead."
-)
-B316.names = {"izip"}
 
 B317 = Error(message=u"B317: Use ``from sentry.utils import json`` instead.")
 B317.modules = {"json", "simplejson"}

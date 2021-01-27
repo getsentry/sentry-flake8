@@ -16,13 +16,6 @@ from sentry_check import (
     B009,
     B010,
     B101,
-    B102,
-    B301,
-    B302,
-    B303,
-    B304,
-    B305,
-    B306,
     B314,
     SentryCheck,
 )
@@ -112,80 +105,10 @@ class SentryCheckTestCase(unittest.TestCase):
         errors = list(bbc.run())
         self.assertEqual(errors, self.errors(B101(8, 0, vars=("assert_called_once",))))
 
-    def test_b102(self):
-        bbc = SentryCheck(filename=path("b102.py"))
-        errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B102(1, 1)))
-
-    def test_b301_b302_b305(self):
-        bbc = SentryCheck(filename=path("b301_b302_b305.py"))
-        errors = list(bbc.run())
-        self.assertEqual(
-            errors,
-            self.errors(
-                B301(34, 4),
-                B301(35, 4),
-                B301(36, 4),
-                B301(37, 4),
-                B302(38, 4),
-                B302(39, 4),
-                B302(40, 4),
-                B302(41, 4),
-                B305(42, 4),
-                B305(43, 4),
-            ),
-        )
-
-    def test_b303_b304(self):
-        bbc = SentryCheck(filename=path("b303_b304.py"))
-        errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B303(21, 4), B304(38, 4)))
-
-    def test_b306(self):
-        bbc = SentryCheck(filename=path("b306.py"))
-        errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B306(8, 10)))
-
     def test_b314(self):
         bbc = SentryCheck(filename=path("b314.py"))
         errors = list(bbc.run())
         self.assertEqual(errors, self.errors(B314(3, 0)))
-
-    def test_b315(self):
-        bbc = SentryCheck(filename=path("b315.py"))
-        errors = list(bbc.run())
-        assert errors == [
-            (
-                3,
-                0,
-                "B315: map is an iterable in Python 3. Use ``from sentry.utils.compat import map`` instead.",
-                SentryCheck,
-            ),
-            (
-                4,
-                0,
-                "B315: filter is an iterable in Python 3. Use ``from sentry.utils.compat import filter`` instead.",
-                SentryCheck,
-            ),
-            (
-                4,
-                21,
-                "B315: zip is an iterable in Python 3. Use ``from sentry.utils.compat import zip`` instead.",
-                SentryCheck,
-            ),
-        ]
-
-    def test_b316(self):
-        bbc = SentryCheck(filename=path("b316.py"))
-        errors = list(bbc.run())
-        assert errors == [
-            (
-                10,
-                0,
-                "B316: itertools.izip is not available in Python 3. Use ``from sentry.utils.compat import zip as izip`` instead.",
-                SentryCheck,
-            ),
-        ]
 
     def test_b317(self):
         bbc = SentryCheck(filename=path("b317.py"))
