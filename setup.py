@@ -17,7 +17,7 @@ setup(
     package_dir={"": "src"},
     extras_require={
         "tests": [
-            "pytest==4.6.5",
+            "pytest==6.2.2",
         ]
     },  # last 2.7 and 3.7 compat version
     py_modules=["sentry_check"],
