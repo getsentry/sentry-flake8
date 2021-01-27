@@ -103,7 +103,7 @@ class SentryCheckTestCase(unittest.TestCase):
     def test_b101(self):
         bbc = SentryCheck(filename=path("b101.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B101(8, 0, vars=("assert_called_once",))))
+        self.assertEqual(errors, self.errors(B101(9, 0, vars=("assert_called_once",))))
 
     def test_b314(self):
         bbc = SentryCheck(filename=path("b314.py"))
