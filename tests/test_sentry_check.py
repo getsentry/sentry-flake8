@@ -148,7 +148,7 @@ class SentryCheckTestCase(unittest.TestCase):
         # self.assertEqual(proc.stderr, b"")
 
     def test_selfclean_test_sentry_check(self):
-        stdout = subprocess.check_output(["flake8", path("test_sentry_check.py")])
+        stdout = subprocess.check_output(["flake8", __file__])
         self.assertEqual(stdout, b"")
         # self.assertEqual(proc.stderr, b'')
 
