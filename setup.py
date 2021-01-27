@@ -13,7 +13,7 @@ setup(
     url="https://github.com/getsentry/sentry-flake8",
     author="Sentry",
     author_email="hello@sentry.io",
-    install_requires=["flake8>=3.7.0,<3.8.0"],
+    install_requires=["flake8>=3.8.0,<3.9.0"],
     package_dir={"": "src"},
     extras_require={
         "tests": [
