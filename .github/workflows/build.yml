@@ -2,14 +2,14 @@ name: build
 on: push
 
 jobs:
-  my_python_job:
-    name: build
+  main:
+    name: main
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python:
-          - 2.7.16
           - 3.6.10
+          - 3.7
     steps:
     - uses: actions/checkout@v2
 
@@ -19,11 +19,12 @@ jobs:
         default: "${{ matrix.python }}"
         command: pip install -U pip  # upgrade pip after installing python
 
-    - name: Install dependencies
-      run: pip install -e .[tests]
+    - name: Install and run fmt + lint
+      run: |
+          pip install --disable-pip-version-check 'black==20.8b1' 'flake8==3.8.4'
+          make fmt && make lint
 
-    - name: Run linting
-      run: make lint
-
-    - name: Run tests
-      run: make test
+    - name: Install and run tests
+      run: |
+          pip install --disable-pip-version-check -e .[tests]
+          make test
