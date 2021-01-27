@@ -1,3 +1,8 @@
+import sys
+
+if sys.version_info[:2] < (3, 6):
+    sys.exit("sentry-flake8 requires at least Python 3.6.")
+
 from setuptools import setup
 
 setup(
@@ -13,4 +18,10 @@ setup(
     extras_require={"tests": ["pytest==4.6.5",]},  # last 2.7 and 3.7 compat version
     py_modules=["sentry_check"],
     entry_points={"flake8.extension": ["B = sentry_check:SentryCheck"]},
+    classifiers=[
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Software Development",
+    ],
 )
