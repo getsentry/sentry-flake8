@@ -176,9 +176,7 @@ class SentryVisitor(ast.NodeVisitor):
     def check_for_b007(self, node):
         targets = NameFinder()
         targets.visit(node.target)
-        ctrl_names = set(
-            filter(lambda s: not s.startswith("_"), targets.names)
-        )
+        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))
         body = NameFinder()
         for expr in node.body:
             body.visit(expr)
