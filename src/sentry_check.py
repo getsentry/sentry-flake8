@@ -121,18 +121,14 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_AsyncFunctionDef(self, node):
-        # self.check_for_b902(node)
         self.check_for_b006(node)
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node):
-        # self.check_for_b901(node)
-        # self.check_for_b902(node)
         self.check_for_b006(node)
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
-        # self.check_for_b903(node)
         self.generic_visit(node)
 
     def visit_Name(self, node):
@@ -263,12 +259,6 @@ class SentryCheck(object):
 
         if not self.tree:
             self.tree = ast.parse("".join(self.lines))
-
-    # def run(self):
-    #     visitor = Py2to3Visitor()
-    #     visitor.visit(self.tree)
-    #     for code, lineno, name in visitor.errors:
-    #         yield lineno, 0, self.codes[code], type(self)
 
     @classmethod
     def adapt_error(cls, e):
