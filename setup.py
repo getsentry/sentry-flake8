@@ -1,7 +1,6 @@
 import sys
 
-if sys.version_info[:2] < (3, 6):
-    sys.exit("sentry-flake8 requires at least Python 3.6.")
+assert (3, 6, 0) <= sys.version_info < (3, 10, 0), "sentry-flake8 requires Python 3.6 - 3.9."
 
 from setuptools import setup  # noqa: e402
 
@@ -20,6 +19,7 @@ setup(
             "pytest==6.2.2",
         ]
     },
+    python_requires=">=3.6, <3.10",
     py_modules=["sentry_check"],
     entry_points={"flake8.extension": ["B = sentry_check:SentryCheck"]},
     classifiers=[

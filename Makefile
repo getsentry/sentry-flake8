@@ -12,7 +12,8 @@ test:
 	py.test
 
 build: clean test lint fmt
-	python setup.py sdist bdist_wheel --universal > /dev/null
+	pip install -U wheel
+	python setup.py sdist bdist_wheel > /dev/null
 
 clean:
 	rm -rf __pycache__/ build/ dist/ *.egg-info/
