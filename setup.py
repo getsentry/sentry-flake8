@@ -19,7 +19,7 @@ setup(
         "tests": [
             "pytest==6.2.2",
         ]
-    },  # last 2.7 and 3.7 compat version
+    },
     py_modules=["sentry_check"],
     entry_points={"flake8.extension": ["B = sentry_check:SentryCheck"]},
     classifiers=[
@@ -27,6 +27,8 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Software Development",
     ],
 )
