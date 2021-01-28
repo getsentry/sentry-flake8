@@ -3,7 +3,7 @@ import sys
 if sys.version_info[:2] < (3, 6):
     sys.exit("sentry-flake8 requires at least Python 3.6.")
 
-from setuptools import setup
+from setuptools import setup  # noqa: e402
 
 setup(
     name="sentry-flake8",

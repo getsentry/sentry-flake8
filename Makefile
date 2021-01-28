@@ -6,7 +6,7 @@ fmt:
 	python -m black .
 
 lint:
-	python -m flake8 --exclude .venv/ -- src/
+	python -m flake8
 
 test:
 	py.test

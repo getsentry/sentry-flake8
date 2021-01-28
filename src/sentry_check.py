@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import ast
 from collections import namedtuple
 from functools import partial
@@ -274,36 +272,36 @@ class SentryCheck(object):
 
 
 error = namedtuple("error", "lineno col message type vars")
-Error = partial(partial, error, message=u"", type=SentryCheck, vars=())
+Error = partial(partial, error, message="", type=SentryCheck, vars=())
 
 B001 = Error(
-    message=u"B001: Do not use bare `except:`, it also catches unexpected "
+    message="B001: Do not use bare `except:`, it also catches unexpected "
     "events like memory errors, interrupts, system exit, and so on.  "
     "Prefer `except Exception:`.  If you're sure what you're doing, "
     "be explicit and write `except BaseException:`."
 )
 
 B002 = Error(
-    message=u"B002: Python does not support the unary prefix increment. Writing "
+    message="B002: Python does not support the unary prefix increment. Writing "
     "++n is equivalent to +(+(n)), which equals n. You meant n += 1."
 )
 
 B003 = Error(
-    message=u"B003: Assigning to `os.environ` doesn't clear the environment. "
+    message="B003: Assigning to `os.environ` doesn't clear the environment. "
     "Subprocesses are going to see outdated variables, in disagreement "
     "with the current process. Use `os.environ.clear()` or the `env=` "
     "argument to Popen."
 )
 
 B004 = Error(
-    message=u"B004: Using `hasattr(x, '__call__')` to test if `x` is callable "
+    message="B004: Using `hasattr(x, '__call__')` to test if `x` is callable "
     "is unreliable. If `x` implements custom `__getattr__` or its "
     "`__call__` is itself not callable, you might get misleading "
     "results. Use `callable(x)` for consistent results."
 )
 
 B005 = Error(
-    message=u"B005: Using .strip() with multi-character strings is misleading "
+    message="B005: Using .strip() with multi-character strings is misleading "
     "the reader. It looks like stripping a substring. Move your "
     "character set to a constant if this is deliberate. Use "
     ".replace() or regular expressions to remove string fragments."
@@ -312,7 +310,7 @@ B005.methods = {"lstrip", "rstrip", "strip"}
 B005.valid_paths = {}
 
 B006 = Error(
-    message=u"B006: Do not use mutable data structures for argument defaults. "
+    message="B006: Do not use mutable data structures for argument defaults. "
     "All calls reuse one instance of that data structure, persisting "
     "changes between them."
 )
@@ -331,11 +329,11 @@ B006.mutable_calls = {
     "set",
 }
 B007 = Error(
-    message=u"B007: Loop control variable {!r} not used within the loop body. "
+    message="B007: Loop control variable {!r} not used within the loop body. "
     "If this is intended, start the name with an underscore."
 )
 B008 = Error(
-    message=u"B008: Do not perform calls in argument defaults. The call is "
+    message="B008: Do not perform calls in argument defaults. The call is "
     "performed only once at function definition time. All calls to your "
     "function will reuse the result of that definition-time call. If "
     "this is intended, assign the function call to a module-level "
@@ -343,16 +341,16 @@ B008 = Error(
 )
 B008.immutable_calls = {"tuple", "frozenset"}
 B009 = Error(
-    message=u"B009: Do not call getattr with a constant attribute value, "
+    message="B009: Do not call getattr with a constant attribute value, "
     "it is not any safer than normal property access."
 )
 B010 = Error(
-    message=u"B010: Do not call setattr with a constant attribute value, "
+    message="B010: Do not call setattr with a constant attribute value, "
     "it is not any safer than normal property access."
 )
 
 B101 = Error(
-    message=u"B101: Avoid using the {} mock call as it is "
+    message="B101: Avoid using the {} mock call as it is "
     "confusing and prone to causing invalid test "
     "behavior."
 )
@@ -367,15 +365,15 @@ B101.methods = {
 }
 
 B312 = Error(
-    message=u"B312: ``cgi.escape`` and ``html.escape`` should not be used. Use "
+    message="B312: ``cgi.escape`` and ``html.escape`` should not be used. Use "
     "sentry.utils.html.escape instead."
 )
 B312.methods = {"escape"}
 B312.invalid_paths = {"cgi", "html"}
 
-B314 = Error(message=u"B314: print functions or statements are not allowed.")
+B314 = Error(message="B314: print functions or statements are not allowed.")
 
-B317 = Error(message=u"B317: Use ``from sentry.utils import json`` instead.")
+B317 = Error(message="B317: Use ``from sentry.utils import json`` instead.")
 B317.modules = {"json", "simplejson"}
 B317.names = {
     "load",
@@ -387,4 +385,6 @@ B317.names = {
     "_default_encoder",
 }
 
-B318 = Error(message=f"B318: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}")
+B318 = Error(
+    message=f"B318: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}"
+)
