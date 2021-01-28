@@ -1,8 +1,7 @@
 import sys
+from setuptools import setup
 
 assert (3, 6, 0) <= sys.version_info < (3, 10, 0), "sentry-flake8 requires Python 3.6 - 3.9."
-
-from setuptools import setup  # noqa: e402
 
 setup(
     name="sentry-flake8",
