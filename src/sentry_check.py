@@ -9,6 +9,16 @@ import pycodestyle
 __version__ = "0.4.0"
 
 
+# We don't want Python 3 code to have Python 2 compatability futures.
+# Refer to Lib/__future__.py in CPython source.
+DISALLOWED_FUTURES = (
+    "absolute_import",
+    "division",
+    "print_function",
+    "unicode_literals",
+)
+
+
 class SentryVisitor(ast.NodeVisitor):
     NODE_WINDOW_SIZE = 4
 
@@ -17,7 +27,6 @@ class SentryVisitor(ast.NodeVisitor):
         self.filename = filename
         self.lines = lines
 
-        # self.has_absolute_import = False
         self.itertools_izip = False
         self.node_stack = []
         self.node_window = []
@@ -45,11 +54,11 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
-        # if node.module == "__future__":
-        #     for nameproxy in node.names:
-        #         if nameproxy.name == "absolute_import":
-        #             self.has_absolute_import = True
-        #             break
+        if node.module == "__future__":
+            for nameproxy in node.names:
+                if nameproxy.name in DISALLOWED_FUTURES:
+                    self.errors.append(B318(node.lineno, node.col_offset))
+                    break
 
         if node.module in B317.modules:
             for nameproxy in node.names:
@@ -377,3 +386,5 @@ B317.names = {
     "JSONDecodeError",
     "_default_encoder",
 }
+
+B318 = Error(message=f"B318: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}")
