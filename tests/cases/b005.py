@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 s = "qwe"
 s.strip(s)  # no warning
 s.strip("we")  # no warning
