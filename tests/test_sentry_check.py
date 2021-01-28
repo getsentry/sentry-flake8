@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 import subprocess
 import unittest
@@ -34,22 +32,22 @@ class SentryCheckTestCase(unittest.TestCase):
     def test_b001(self):
         bbc = SentryCheck(filename=path("b001.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B001(5, 0), B001(37, 4)))
+        self.assertEqual(errors, self.errors(B001(3, 0), B001(35, 4)))
 
     def test_b002(self):
         bbc = SentryCheck(filename=path("b002.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B002(12, 8), B002(17, 11)))
+        self.assertEqual(errors, self.errors(B002(9, 8), B002(14, 11)))
 
     def test_b003(self):
         bbc = SentryCheck(filename=path("b003.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B003(7, 0)))
+        self.assertEqual(errors, self.errors(B003(5, 0)))
 
     def test_b004(self):
         bbc = SentryCheck(filename=path("b004.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B004(8, 7), B004(10, 7)))
+        self.assertEqual(errors, self.errors(B004(6, 7), B004(8, 7)))
 
     def test_b005(self):
         bbc = SentryCheck(filename=path("b005.py"))
@@ -57,12 +55,12 @@ class SentryCheckTestCase(unittest.TestCase):
         self.assertEqual(
             errors,
             self.errors(
-                B005(6, 0),
-                B005(9, 0),
-                B005(12, 0),
-                B005(15, 0),
-                B005(18, 0),
-                B005(21, 0),
+                B005(4, 0),
+                B005(7, 0),
+                B005(10, 0),
+                B005(13, 0),
+                B005(16, 0),
+                B005(19, 0),
             ),
         )
 
@@ -72,13 +70,11 @@ class SentryCheckTestCase(unittest.TestCase):
         self.assertEqual(
             errors,
             self.errors(
-                B006(16, 24),
-                B006(20, 29),
-                B006(24, 19),
-                B006(28, 19),
-                # B006(32, 31),
-                B008(41, 38),
-                # B006(55, 32),
+                B006(14, 24),
+                B006(18, 29),
+                B006(22, 19),
+                B006(26, 19),
+                B008(39, 38),
             ),
         )
 
@@ -88,32 +84,44 @@ class SentryCheckTestCase(unittest.TestCase):
         self.assertEqual(
             errors,
             self.errors(
-                B007(10, 4, vars=("i",)),
-                B007(22, 12, vars=("k",)),
-                B007(34, 4, vars=("i",)),
-                B007(34, 12, vars=("k",)),
+                B007(8, 4, vars=("i",)),
+                B007(20, 12, vars=("k",)),
+                B007(32, 4, vars=("i",)),
+                B007(32, 12, vars=("k",)),
             ),
         )
 
     def test_b009_b010(self):
         bbc = SentryCheck(filename=path("b009_b010.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B009(11, 0), B010(18, 0)))
+        self.assertEqual(errors, self.errors(B009(9, 0), B010(16, 0)))
 
     def test_b101(self):
         bbc = SentryCheck(filename=path("b101.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B101(9, 0, vars=("assert_called_once",))))
+        self.assertEqual(errors, self.errors(B101(6, 0, vars=("assert_called_once",))))
 
     def test_b314(self):
         bbc = SentryCheck(filename=path("b314.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B314(3, 0)))
+        self.assertEqual(errors, self.errors(B314(1, 0)))
 
     def test_b317(self):
         bbc = SentryCheck(filename=path("b317.py"))
         errors = list(bbc.run())
         assert errors == [
+            (
+                1,
+                0,
+                "B317: Use ``from sentry.utils import json`` instead.",
+                SentryCheck,
+            ),
+            (
+                2,
+                0,
+                "B317: Use ``from sentry.utils import json`` instead.",
+                SentryCheck,
+            ),
             (
                 3,
                 0,
@@ -122,18 +130,6 @@ class SentryCheckTestCase(unittest.TestCase):
             ),
             (
                 4,
-                0,
-                "B317: Use ``from sentry.utils import json`` instead.",
-                SentryCheck,
-            ),
-            (
-                5,
-                0,
-                "B317: Use ``from sentry.utils import json`` instead.",
-                SentryCheck,
-            ),
-            (
-                6,
                 0,
                 "B317: Use ``from sentry.utils import json`` instead.",
                 SentryCheck,
