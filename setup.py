@@ -5,7 +5,7 @@ assert (3, 6, 0) <= sys.version_info < (3, 10, 0), "sentry-flake8 requires Pytho
 
 setup(
     name="sentry-flake8",
-    version="0.4.0",
+    version="1.0.0",
     description="Sentry's custom flake8 checker plugin.",
     license="Apache 2.0",
     url="https://github.com/getsentry/sentry-flake8",
