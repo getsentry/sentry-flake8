@@ -9,13 +9,13 @@ branches:
 
 matrix:
   include:
-    - python: 2.7
-    - python: 3.7
+    - python: 3.6
 
 install:
-  - pip install -e .[tests]
+  - pip install --disable-pip-version-check -e .[tests]
 
 script:
+  - pip install --disable-pip-version-check 'black==20.8b1' 'flake8==3.8.4'
   - make build
 
 deploy:

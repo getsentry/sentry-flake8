@@ -2,13 +2,16 @@
 
 all: build
 
+fmt:
+	python -m black .
+
 lint:
-	flake8 src/
+	python -m flake8 --exclude .venv/ -- src/
 
 test:
 	py.test
 
-build: clean test lint
+build: clean test lint fmt
 	python setup.py sdist bdist_wheel --universal > /dev/null
 
 clean:
