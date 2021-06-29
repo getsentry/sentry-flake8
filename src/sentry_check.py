@@ -24,13 +24,8 @@ class SentryVisitor(ast.NodeVisitor):
         self.errors = []
         self.filename = filename
         self.lines = lines
-
-        self.itertools_izip = False
         self.node_stack = []
         self.node_window = []
-
-    def finish(self):
-        pass
 
     def visit(self, node):
         self.node_stack.append(node)
@@ -43,7 +38,7 @@ class SentryVisitor(ast.NodeVisitor):
         if node.module == "__future__":
             for nameproxy in node.names:
                 if nameproxy.name in DISALLOWED_FUTURES:
-                    self.errors.append(B318(node.lineno, node.col_offset))
+                    self.errors.append(S005(node.lineno, node.col_offset))
                     break
 
         if node.module in S003.modules:
@@ -59,7 +54,7 @@ class SentryVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Attribute):
-            for bug in (B312,):
+            for bug in (S004,):
                 if node.func.attr in bug.methods:
                     call_path = ".".join(self.compose_call_path(node.func.value))
                     if call_path in bug.invalid_paths:
@@ -91,28 +86,6 @@ class SentryVisitor(ast.NodeVisitor):
             yield node.id
 
 
-class NameFinder(ast.NodeVisitor):
-    """Finds a name within a tree of nodes.
-    After `.visit(node)` is called, `found` is a dict with all name nodes inside,
-    key is name string, value is the node (useful for location purposes).
-    """
-
-    def __init__(self, names=None):
-        self.names = names or {}
-
-    def visit_Name(self, node):
-        self.names.setdefault(node.id, []).append(node)
-
-    def visit(self, node):
-        """Like super-visit but supports iteration over lists."""
-        if not isinstance(node, list):
-            return super(NameFinder, self).visit(node)
-
-        for elem in node:
-            super(NameFinder, self).visit(elem)
-        return node
-
-
 class SentryCheck(object):
     name = "sentry-flake8"
     version = __version__
@@ -129,7 +102,7 @@ class SentryCheck(object):
 
         visitor = self.visitor(filename=self.filename, lines=self.lines)
         visitor.visit(self.tree)
-        visitor.finish()
+
         for e in visitor.errors:
             try:
                 if pycodestyle.noqa(self.lines[e.lineno - 1]):
@@ -179,13 +152,6 @@ S001.methods = {
     "called_once_with",
 }
 
-B312 = Error(
-    message="B312: ``cgi.escape`` and ``html.escape`` should not be used. Use "
-    "sentry.utils.html.escape instead."
-)
-B312.methods = {"escape"}
-B312.invalid_paths = {"cgi", "html"}
-
 S002 = Error(message="S002: print functions or statements are not allowed.")
 
 S003 = Error(message="S003: Use ``from sentry.utils import json`` instead.")
@@ -200,6 +166,13 @@ S003.names = {
     "_default_encoder",
 }
 
-B318 = Error(
-    message=f"B318: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}"
+S004 = Error(
+    message="S004: ``cgi.escape`` and ``html.escape`` should not be used. Use "
+    "sentry.utils.html.escape instead."
+)
+S004.methods = {"escape"}
+S004.invalid_paths = {"cgi", "html"}
+
+S005 = Error(
+    message=f"S005: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}"
 )

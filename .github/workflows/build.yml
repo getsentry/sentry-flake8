@@ -23,11 +23,10 @@ jobs:
 
     - name: Install and run fmt + lint
       run: |
-          pip install --disable-pip-version-check 'black==21.6b0' 'flake8==3.9.2'
+          pip install --disable-pip-version-check 'black==21.6b0' 'flake8==3.9.2' 'flake8-bugbear==21.4.3'
           make fmt && make lint
 
     - name: Install and run tests
       run: |
           pip install --disable-pip-version-check -e .[tests]
           make test
-          make lint
