@@ -15,7 +15,7 @@ setup(
     package_dir={"": "src"},
     extras_require={
         "tests": [
-            "pytest==6.2.2",
+            "pytest==6.2.4",
         ]
     },
     python_requires=">=3.6, <3.10",

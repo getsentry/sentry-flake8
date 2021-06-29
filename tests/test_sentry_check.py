@@ -3,7 +3,6 @@ import subprocess
 import unittest
 
 from sentry_check import (
-    B010,
     B101,
     B314,
     SentryCheck,
