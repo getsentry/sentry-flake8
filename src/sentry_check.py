@@ -46,16 +46,16 @@ class SentryVisitor(ast.NodeVisitor):
                     self.errors.append(B318(node.lineno, node.col_offset))
                     break
 
-        if node.module in B317.modules:
+        if node.module in S003.modules:
             for nameproxy in node.names:
-                if nameproxy.name in B317.names:
-                    self.errors.append(B317(node.lineno, node.col_offset))
+                if nameproxy.name in S003.names:
+                    self.errors.append(S003(node.lineno, node.col_offset))
                     break
 
     def visit_Import(self, node):
         for alias in node.names:
-            if alias.name.split(".", 1)[0] in B317.modules:
-                self.errors.append(B317(node.lineno, node.col_offset))
+            if alias.name.split(".", 1)[0] in S003.modules:
+                self.errors.append(S003(node.lineno, node.col_offset))
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Attribute):
@@ -68,8 +68,8 @@ class SentryVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Attribute(self, node):
-        if node.attr in B101.methods:
-            self.errors.append(B101(node.lineno, node.col_offset, vars=(node.attr,)))
+        if node.attr in S001.methods:
+            self.errors.append(S001(node.lineno, node.col_offset, vars=(node.attr,)))
 
     def visit_Name(self, node):
         if node.id == "print":
@@ -80,7 +80,7 @@ class SentryVisitor(ast.NodeVisitor):
 
     def check_print(self, node):
         if not self.filename.startswith("tests/"):
-            self.errors.append(B314(lineno=node.lineno, col=node.col_offset))
+            self.errors.append(S002(lineno=node.lineno, col=node.col_offset))
 
     def compose_call_path(self, node):
         if isinstance(node, ast.Attribute):
@@ -164,12 +164,12 @@ class SentryCheck(object):
 error = namedtuple("error", "lineno col message type vars")
 Error = partial(partial, error, message="", type=SentryCheck, vars=())
 
-B101 = Error(
-    message="B101: Avoid using the {} mock call as it is "
+S001 = Error(
+    message="S001: Avoid using the {} mock call as it is "
     "confusing and prone to causing invalid test "
     "behavior."
 )
-B101.methods = {
+S001.methods = {
     "assert_calls",
     "assert_not_called",
     "assert_called",
@@ -186,11 +186,11 @@ B312 = Error(
 B312.methods = {"escape"}
 B312.invalid_paths = {"cgi", "html"}
 
-B314 = Error(message="B314: print functions or statements are not allowed.")
+S002 = Error(message="S002: print functions or statements are not allowed.")
 
-B317 = Error(message="B317: Use ``from sentry.utils import json`` instead.")
-B317.modules = {"json", "simplejson"}
-B317.names = {
+S003 = Error(message="S003: Use ``from sentry.utils import json`` instead.")
+S003.modules = {"json", "simplejson"}
+S003.names = {
     "load",
     "loads",
     "dump",

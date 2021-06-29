@@ -3,8 +3,8 @@ import subprocess
 import unittest
 
 from sentry_check import (
-    B101,
-    B314,
+    S001,
+    S002,
     SentryCheck,
 )
 
@@ -19,42 +19,42 @@ class SentryCheckTestCase(unittest.TestCase):
     def errors(self, *errors):
         return [SentryCheck.adapt_error(e) for e in errors]
 
-    def test_b101(self):
-        bbc = SentryCheck(filename=path("b101.py"))
+    def test_S001(self):
+        bbc = SentryCheck(filename=path("S001.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B101(6, 0, vars=("assert_called_once",))))
+        self.assertEqual(errors, self.errors(S001(6, 0, vars=("assert_called_once",))))
 
-    def test_b314(self):
-        bbc = SentryCheck(filename=path("b314.py"))
+    def test_S002(self):
+        bbc = SentryCheck(filename=path("S002.py"))
         errors = list(bbc.run())
-        self.assertEqual(errors, self.errors(B314(1, 0)))
+        self.assertEqual(errors, self.errors(S002(1, 0)))
 
-    def test_b317(self):
-        bbc = SentryCheck(filename=path("b317.py"))
+    def test_S003(self):
+        bbc = SentryCheck(filename=path("S003.py"))
         errors = list(bbc.run())
         assert errors == [
             (
                 1,
                 0,
-                "B317: Use ``from sentry.utils import json`` instead.",
+                "S003: Use ``from sentry.utils import json`` instead.",
                 SentryCheck,
             ),
             (
                 2,
                 0,
-                "B317: Use ``from sentry.utils import json`` instead.",
+                "S003: Use ``from sentry.utils import json`` instead.",
                 SentryCheck,
             ),
             (
                 3,
                 0,
-                "B317: Use ``from sentry.utils import json`` instead.",
+                "S003: Use ``from sentry.utils import json`` instead.",
                 SentryCheck,
             ),
             (
                 4,
                 0,
-                "B317: Use ``from sentry.utils import json`` instead.",
+                "S003: Use ``from sentry.utils import json`` instead.",
                 SentryCheck,
             ),
         ]
