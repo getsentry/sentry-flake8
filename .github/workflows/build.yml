@@ -30,3 +30,4 @@ jobs:
       run: |
           pip install --disable-pip-version-check -e .[tests]
           make test
+          make lint
