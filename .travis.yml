@@ -12,10 +12,9 @@ matrix:
     - python: 3.6
 
 install:
-  - pip install --disable-pip-version-check -e .[tests]
+  - pip install --disable-pip-version-check -e .
 
 script:
-  - pip install --disable-pip-version-check 'black==20.8b1' 'flake8==3.8.4'
   - make build
 
 deploy:
