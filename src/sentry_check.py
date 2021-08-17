@@ -4,7 +4,7 @@ from functools import partial
 
 import pycodestyle
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 
 # We don't want Python 3 code to have Python 2 compatability futures.

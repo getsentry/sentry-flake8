@@ -13,7 +13,7 @@ No further configuration is necessary for `flake8` to load the plugin. An exampl
 
 ```
 $ flake8 --version
-3.8.4 (mccabe: 0.6.1, pycodestyle: 2.6.0, pyflakes: 2.2.0, sentry-flake8: 1.0.0) CPython 3.6.10 on Darwin
+3.8.4 (flake8-bugbear: 21.4.3, mccabe: 0.6.1, pycodestyle: 2.6.0, pyflakes: 2.2.0, sentry-flake8: 2.0.0) CPython 3.6.13 on Darwin
 ```
 
 ## Credits
