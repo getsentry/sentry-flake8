@@ -24,13 +24,8 @@ class SentryVisitor(ast.NodeVisitor):
         self.errors = []
         self.filename = filename
         self.lines = lines
-
-        self.itertools_izip = False
         self.node_stack = []
         self.node_window = []
-
-    def finish(self):
-        pass
 
     def visit(self, node):
         self.node_stack.append(node)
@@ -39,104 +34,37 @@ class SentryVisitor(ast.NodeVisitor):
         super(SentryVisitor, self).visit(node)
         self.node_stack.pop()
 
-    def visit_ExceptHandler(self, node):
-        if node.type is None:
-            self.errors.append(B001(node.lineno, node.col_offset))
-        self.generic_visit(node)
-
-    def visit_UAdd(self, node):
-        trailing_nodes = list(map(type, self.node_window[-4:]))
-        if trailing_nodes == [ast.UnaryOp, ast.UAdd, ast.UnaryOp, ast.UAdd]:
-            originator = self.node_window[-4]
-            self.errors.append(B002(originator.lineno, originator.col_offset))
-        self.generic_visit(node)
-
     def visit_ImportFrom(self, node):
         if node.module == "__future__":
             for nameproxy in node.names:
                 if nameproxy.name in DISALLOWED_FUTURES:
-                    self.errors.append(B318(node.lineno, node.col_offset))
+                    self.errors.append(S005(node.lineno, node.col_offset))
                     break
 
-        if node.module in B317.modules:
+        if node.module in S003.modules:
             for nameproxy in node.names:
-                if nameproxy.name in B317.names:
-                    self.errors.append(B317(node.lineno, node.col_offset))
+                if nameproxy.name in S003.names:
+                    self.errors.append(S003(node.lineno, node.col_offset))
                     break
 
     def visit_Import(self, node):
         for alias in node.names:
-            if alias.name.split(".", 1)[0] in B317.modules:
-                self.errors.append(B317(node.lineno, node.col_offset))
+            if alias.name.split(".", 1)[0] in S003.modules:
+                self.errors.append(S003(node.lineno, node.col_offset))
 
     def visit_Call(self, node):
         if isinstance(node.func, ast.Attribute):
-            self.check_for_b005(node)
-            for bug in (B312,):
+            for bug in (S004,):
                 if node.func.attr in bug.methods:
                     call_path = ".".join(self.compose_call_path(node.func.value))
                     if call_path in bug.invalid_paths:
                         self.errors.append(bug(node.lineno, node.col_offset))
                     break
-        else:
-            self.check_for_b004(node)
-            self.check_for_b009_b010(node)
         self.generic_visit(node)
-
-    def check_for_b004(self, node):
-        try:
-            if (
-                node.func.id in ("getattr", "hasattr")
-                and node.args[1].s == "__call__"  # noqa: W503
-            ):
-                self.errors.append(B004(node.lineno, node.col_offset))
-        except (AttributeError, IndexError):
-            pass
-
-    def check_for_b009_b010(self, node):
-        try:
-            if (
-                node.func.id == "getattr"
-                and len(node.args) == 2  # noqa: W503
-                and isinstance(node.args[1], ast.Str)  # noqa: W503
-            ):
-                self.errors.append(B009(node.lineno, node.col_offset))
-            elif (
-                node.func.id == "setattr"
-                and len(node.args) == 3  # noqa: W503
-                and isinstance(node.args[1], ast.Str)  # noqa: W503
-            ):
-                self.errors.append(B010(node.lineno, node.col_offset))
-        except (AttributeError, IndexError):
-            pass
 
     def visit_Attribute(self, node):
-        if node.attr in B101.methods:
-            self.errors.append(B101(node.lineno, node.col_offset, vars=(node.attr,)))
-
-    def visit_Assign(self, node):
-        if len(node.targets) == 1:
-            t = node.targets[0]
-            if isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name):
-                if (t.value.id, t.attr) == ("os", "environ"):
-                    self.errors.append(B003(node.lineno, node.col_offset))
-
-        self.generic_visit(node)
-
-    def visit_For(self, node):
-        self.check_for_b007(node)
-        self.generic_visit(node)
-
-    def visit_AsyncFunctionDef(self, node):
-        self.check_for_b006(node)
-        self.generic_visit(node)
-
-    def visit_FunctionDef(self, node):
-        self.check_for_b006(node)
-        self.generic_visit(node)
-
-    def visit_ClassDef(self, node):
-        self.generic_visit(node)
+        if node.attr in S001.methods:
+            self.errors.append(S001(node.lineno, node.col_offset, vars=(node.attr,)))
 
     def visit_Name(self, node):
         if node.id == "print":
@@ -147,50 +75,7 @@ class SentryVisitor(ast.NodeVisitor):
 
     def check_print(self, node):
         if not self.filename.startswith("tests/"):
-            self.errors.append(B314(lineno=node.lineno, col=node.col_offset))
-
-    def check_for_b005(self, node):
-        if node.func.attr not in B005.methods:
-            return  # method name doesn't match
-
-        if len(node.args) != 1 or not isinstance(node.args[0], ast.Str):
-            return  # used arguments don't match the builtin strip
-
-        call_path = ".".join(self.compose_call_path(node.func.value))
-        if call_path in B005.valid_paths:
-            return  # path is exempt
-
-        s = node.args[0].s
-        if len(s) == 1:
-            return  # stripping just one character
-
-        if len(s) == len(set(s)):
-            return  # no characters appear more than once
-
-        self.errors.append(B005(node.lineno, node.col_offset))
-
-    def check_for_b006(self, node):
-        for default in node.args.defaults:
-            if isinstance(default, B006.mutable_literals):
-                self.errors.append(B006(default.lineno, default.col_offset))
-            elif isinstance(default, ast.Call):
-                call_path = ".".join(self.compose_call_path(default.func))
-                if call_path in B006.mutable_calls:
-                    self.errors.append(B006(default.lineno, default.col_offset))
-                elif call_path not in B008.immutable_calls:
-                    self.errors.append(B008(default.lineno, default.col_offset))
-
-    def check_for_b007(self, node):
-        targets = NameFinder()
-        targets.visit(node.target)
-        ctrl_names = set(filter(lambda s: not s.startswith("_"), targets.names))
-        body = NameFinder()
-        for expr in node.body:
-            body.visit(expr)
-        used_names = set(body.names)
-        for name in sorted(ctrl_names - used_names):
-            n = targets.names[name][0]
-            self.errors.append(B007(n.lineno, n.col_offset, vars=(name,)))
+            self.errors.append(S002(lineno=node.lineno, col=node.col_offset))
 
     def compose_call_path(self, node):
         if isinstance(node, ast.Attribute):
@@ -199,28 +84,6 @@ class SentryVisitor(ast.NodeVisitor):
             yield node.attr
         elif isinstance(node, ast.Name):
             yield node.id
-
-
-class NameFinder(ast.NodeVisitor):
-    """Finds a name within a tree of nodes.
-    After `.visit(node)` is called, `found` is a dict with all name nodes inside,
-    key is name string, value is the node (useful for location purposes).
-    """
-
-    def __init__(self, names=None):
-        self.names = names or {}
-
-    def visit_Name(self, node):
-        self.names.setdefault(node.id, []).append(node)
-
-    def visit(self, node):
-        """Like super-visit but supports iteration over lists."""
-        if not isinstance(node, list):
-            return super(NameFinder, self).visit(node)
-
-        for elem in node:
-            super(NameFinder, self).visit(elem)
-        return node
 
 
 class SentryCheck(object):
@@ -239,7 +102,7 @@ class SentryCheck(object):
 
         visitor = self.visitor(filename=self.filename, lines=self.lines)
         visitor.visit(self.tree)
-        visitor.finish()
+
         for e in visitor.errors:
             try:
                 if pycodestyle.noqa(self.lines[e.lineno - 1]):
@@ -274,87 +137,12 @@ class SentryCheck(object):
 error = namedtuple("error", "lineno col message type vars")
 Error = partial(partial, error, message="", type=SentryCheck, vars=())
 
-B001 = Error(
-    message="B001: Do not use bare `except:`, it also catches unexpected "
-    "events like memory errors, interrupts, system exit, and so on.  "
-    "Prefer `except Exception:`.  If you're sure what you're doing, "
-    "be explicit and write `except BaseException:`."
-)
-
-B002 = Error(
-    message="B002: Python does not support the unary prefix increment. Writing "
-    "++n is equivalent to +(+(n)), which equals n. You meant n += 1."
-)
-
-B003 = Error(
-    message="B003: Assigning to `os.environ` doesn't clear the environment. "
-    "Subprocesses are going to see outdated variables, in disagreement "
-    "with the current process. Use `os.environ.clear()` or the `env=` "
-    "argument to Popen."
-)
-
-B004 = Error(
-    message="B004: Using `hasattr(x, '__call__')` to test if `x` is callable "
-    "is unreliable. If `x` implements custom `__getattr__` or its "
-    "`__call__` is itself not callable, you might get misleading "
-    "results. Use `callable(x)` for consistent results."
-)
-
-B005 = Error(
-    message="B005: Using .strip() with multi-character strings is misleading "
-    "the reader. It looks like stripping a substring. Move your "
-    "character set to a constant if this is deliberate. Use "
-    ".replace() or regular expressions to remove string fragments."
-)
-B005.methods = {"lstrip", "rstrip", "strip"}
-B005.valid_paths = {}
-
-B006 = Error(
-    message="B006: Do not use mutable data structures for argument defaults. "
-    "All calls reuse one instance of that data structure, persisting "
-    "changes between them."
-)
-B006.mutable_literals = (ast.Dict, ast.List, ast.Set)
-B006.mutable_calls = {
-    "Counter",
-    "OrderedDict",
-    "collections.Counter",
-    "collections.OrderedDict",
-    "collections.defaultdict",
-    "collections.deque",
-    "defaultdict",
-    "deque",
-    "dict",
-    "list",
-    "set",
-}
-B007 = Error(
-    message="B007: Loop control variable {!r} not used within the loop body. "
-    "If this is intended, start the name with an underscore."
-)
-B008 = Error(
-    message="B008: Do not perform calls in argument defaults. The call is "
-    "performed only once at function definition time. All calls to your "
-    "function will reuse the result of that definition-time call. If "
-    "this is intended, assign the function call to a module-level "
-    "variable and use that variable as a default value."
-)
-B008.immutable_calls = {"tuple", "frozenset"}
-B009 = Error(
-    message="B009: Do not call getattr with a constant attribute value, "
-    "it is not any safer than normal property access."
-)
-B010 = Error(
-    message="B010: Do not call setattr with a constant attribute value, "
-    "it is not any safer than normal property access."
-)
-
-B101 = Error(
-    message="B101: Avoid using the {} mock call as it is "
+S001 = Error(
+    message="S001: Avoid using the {} mock call as it is "
     "confusing and prone to causing invalid test "
     "behavior."
 )
-B101.methods = {
+S001.methods = {
     "assert_calls",
     "assert_not_called",
     "assert_called",
@@ -364,18 +152,11 @@ B101.methods = {
     "called_once_with",
 }
 
-B312 = Error(
-    message="B312: ``cgi.escape`` and ``html.escape`` should not be used. Use "
-    "sentry.utils.html.escape instead."
-)
-B312.methods = {"escape"}
-B312.invalid_paths = {"cgi", "html"}
+S002 = Error(message="S002: print functions or statements are not allowed.")
 
-B314 = Error(message="B314: print functions or statements are not allowed.")
-
-B317 = Error(message="B317: Use ``from sentry.utils import json`` instead.")
-B317.modules = {"json", "simplejson"}
-B317.names = {
+S003 = Error(message="S003: Use ``from sentry.utils import json`` instead.")
+S003.modules = {"json", "simplejson"}
+S003.names = {
     "load",
     "loads",
     "dump",
@@ -385,6 +166,13 @@ B317.names = {
     "_default_encoder",
 }
 
-B318 = Error(
-    message=f"B318: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}"
+S004 = Error(
+    message="S004: ``cgi.escape`` and ``html.escape`` should not be used. Use "
+    "sentry.utils.html.escape instead."
+)
+S004.methods = {"escape"}
+S004.invalid_paths = {"cgi", "html"}
+
+S005 = Error(
+    message=f"S005: The following __future__ are not allowed: {', '.join(DISALLOWED_FUTURES)}"
 )

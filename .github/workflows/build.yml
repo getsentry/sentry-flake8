@@ -8,22 +8,22 @@ jobs:
     strategy:
       matrix:
         python:
-          - 3.6.10
+          - 3.6.13
           - 3.7.9
-          - 3.8.6
-          - 3.9.0
+          - 3.8.10
+          - 3.9.2
     steps:
     - uses: actions/checkout@v2
 
     - name: Install python
-      uses: gabrielfalcao/pyenv-action@v7
+      uses: gabrielfalcao/pyenv-action@v8
       with:
         default: "${{ matrix.python }}"
         command: pip install -U pip  # upgrade pip after installing python
 
     - name: Install and run fmt + lint
       run: |
-          pip install --disable-pip-version-check 'black==20.8b1' 'flake8==3.8.4'
+          pip install --disable-pip-version-check 'black==21.6b0' 'flake8==3.9.2' 'flake8-bugbear==21.4.3'
           make fmt && make lint
 
     - name: Install and run tests
