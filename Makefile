@@ -2,16 +2,13 @@
 
 all: build
 
-fmt:
-	python -m black .
-
-lint:
-	python -m flake8
+fmt lint:
+	pre-commit run --all-files --show-diff-on-failure
 
 test:
-	py.test
+	pytest
 
-build: clean test lint fmt
+build: clean test fmt
 	pip install -U wheel
 	python setup.py sdist bdist_wheel > /dev/null
 
