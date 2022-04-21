@@ -1,7 +1,4 @@
-import sys
 from setuptools import setup
-
-assert (3, 6, 0) <= sys.version_info < (3, 10, 0), "sentry-flake8 requires Python 3.6 - 3.9."
 
 setup(
     name="sentry-flake8",
@@ -21,7 +18,7 @@ setup(
             "pytest==6.2.4",
         ]
     },
-    python_requires=">=3.6, <3.10",
+    python_requires=">=3.6",
     py_modules=["sentry_check"],
     entry_points={"flake8.extension": ["S = sentry_check:SentryCheck"]},
     classifiers=[
