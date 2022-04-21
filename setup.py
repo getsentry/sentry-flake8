@@ -12,7 +12,7 @@ setup(
     author="Sentry",
     author_email="hello@sentry.io",
     install_requires=[
-        "flake8>=3.8.0,<3.10.0",
+        "flake8>=3.8.0",
         "flake8-bugbear==21.4.3",
     ],
     package_dir={"": "src"},
