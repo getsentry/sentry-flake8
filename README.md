@@ -1,3 +1,10 @@
+# DEPRECATED
+
+`sentry-flake8` was always specific to `getsentry/sentry` and so it was merged in as a
+[flake8 local-plugin](https://github.com/getsentry/sentry/pull/33830)
+
+___
+
 # sentry-flake8
 
 [![PyPI](https://img.shields.io/pypi/v/sentry-flake8.svg)](https://pypi.org/project/sentry-flake8)
